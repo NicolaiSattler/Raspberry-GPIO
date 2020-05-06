@@ -3,8 +3,10 @@ import time
 
 GPIO.setmode(GPIO.BCM)
 
-segmentPorts = (11, 4 ,23, 8, 7, 10, 18, 25)
+dotPort = 25
+segmentPorts = (11, 4 ,23, 8, 7, 10, 18)
 digitPorts = (22, 27, 17, 24)
+colonPorts = (5, 6)
 #more info: https://cdn-shop.adafruit.com/datasheets/1001datasheet.pdf
 numbers = { 
         ' ' : (0, 0, 0, 0, 0, 0, 0),
@@ -28,6 +30,10 @@ for digit in digitPorts:
     GPIO.setup(digit, GPIO.OUT)
     GPIO.output(digit, 1)
 
+for item in colonPorts:
+    GPIO.setup(item, GPIO.OUT)
+    GPIO.output(item, 1)
+
 try:
     while True:
         now = time.ctime()
@@ -47,9 +53,9 @@ try:
                 GPIO.output(setPort, onOff)
 
                 if (secondIsEvent == True):
-                    GPIO.output(25, 1)
+                    GPIO.output(6, 1)
                 else:
-                    GPIO.output(25, 0)
+                    GPIO.output(6, 0)
 
 
             GPIO.output(digitPort, 0)
