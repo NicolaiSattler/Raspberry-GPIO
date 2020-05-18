@@ -1,74 +1,30 @@
 import RPi.GPIO as GPIO
-import time
 
-GPIO.setmode(GPIO.BCM)
+from clock import SegmentClock 
 
-dotPort = 25
-segmentPorts = (11, 4 ,23, 8, 7, 10, 18)
-digitPorts = (22, 27, 17, 24)
-colonPorts = (5, 6)
-#more info: https://cdn-shop.adafruit.com/datasheets/1001datasheet.pdf
-numbers = { 
-        ' ' : (0, 0, 0, 0, 0, 0, 0),
-        '0' : (1, 1, 1, 1, 1, 1, 0),
-        '1' : (0, 1, 1, 0, 0, 0, 0),
-        '2' : (1, 1, 0, 1, 1, 0, 1),
-        '3' : (1, 1, 1, 1, 0, 0, 1),
-        '4' : (0, 1, 1, 0, 0, 1, 1),
-        '5' : (1, 0, 1, 1, 0, 1, 1),
-        '6' : (1, 0, 1, 1, 1, 1, 1),
-        '7' : (1, 1, 1, 0, 0, 0, 0),
-        '8' : (1, 1, 1, 1, 1, 1, 1),
-        '9' : (1, 1, 1, 1, 0, 1, 1)
-        }
+class Main:
 
-for item in segmentPorts:
-    GPIO.setup(item, GPIO.OUT)
-    GPIO.output(item, 0)
+    def __init__(self):
+        
+        self.displayType = 0
+        self.buttonPin = 13
 
-for digit in digitPorts:
-    GPIO.setup(digit, GPIO.OUT)
-    GPIO.output(digit, 1)
+        self.setBoardMode()
+        self.setupButton()
 
-for item in colonPorts:
-    GPIO.setup(item, GPIO.OUT)
-    GPIO.output(item, 1)
+        self.clock = SegmentClock()
+        self.clock.setupPorts()
+        self.clock.displayTemperature()
 
-try:
-    while True:
-        now = time.ctime()
-        currentHourAndMinute = now[11:13] + now[14:16]
-        s = str(currentHourAndMinute).rjust(4)
-        secondIsEvent = int(now[18:19])%2 == 0
+    def setBoardMode(self):
+        GPIO.setmode(GPIO.BCM)
 
-        for digit in range(4):
-            numberOfDigit = s[digit]
-            onOffTuple = numbers[numberOfDigit]
-            digitPort = digitPorts[digit]
+    #event is not being triggered. test if circuit is correct --> use led?
+    def setupButton(self):
+        GPIO.setup(self.buttonPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.add_event_detect(self.buttonPin, GPIO.RISING, callback=self.button_callback)
 
-            for seg in range(0, 7):
-                setPort = segmentPorts[seg]
-                onOff = onOffTuple[seg]
+    def button_callback(self, channel):
+        print('Button was pushed!')
 
-                GPIO.output(setPort, onOff)
-
-                if (secondIsEvent == True):
-                    GPIO.output(6, 1)
-                else:
-                    GPIO.output(6, 0)
-
-
-            GPIO.output(digitPort, 0)
-
-            time.sleep(0.001)
-
-            GPIO.output(digitPort, 1)
-
-finally:
-    GPIO.cleanup()
-
-
-                
-
-
-
+Main()
